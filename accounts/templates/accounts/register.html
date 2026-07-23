@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar %}{% endblock navbar %}
+{% block footer %}{% endblock footer %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+
+            <!-- HEADER -->
+            <div class="text-center mb-4">
+                <div class="brand-icon mx-auto mb-3" style="width:52px;height:52px;font-size:22px;">
+                    <i class="fa fa-user-plus"></i>
+                </div>
+                <h3 class="fw-bold mb-1" style="color:var(--text);">Create Account</h3>
+                <p class="text-muted" style="font-size:14px;">Join CodeShelf and start building</p>
+            </div>
+
+            <div class="neu-raised rounded p-4 p-md-5">
+
+                <!-- ERRORS -->
+                {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible fade show mb-4">
+                    {% if "Email already exists" in form.errors.email.0 or "Email already exists" in form.errors.values|stringformat:"s" %}
+                        <strong>Email already registered!</strong><br>
+                        Would you like to use this single account for both Customer and Seller purposes? <br>
+                        <a href="{% url 'login' %}" class="fw-bold" style="color: inherit; text-decoration: underline;">Log in and Switch Roles</a> instead.<br>
+                        If you want a completely separate account, please use a different email address.
+                    {% else %}
+                        {{ form.errors }}
+                    {% endif %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- USERNAME -->
+                    <div class="mb-3">
+                        <label class="form-label">Username *</label>
+                        {{ form.username }}
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="mb-3">
+                        <label class="form-label">Email Address *</label>
+                        {{ form.email }}
+                    </div>
+
+                    <!-- ROLE -->
+                    <div class="mb-3">
+                        <label class="form-label">Register As *</label>
+                        {{ form.role }}
+                    </div>
+
+                    <!-- PASSWORD -->
+                    <div class="mb-1 position-relative">
+                        <label class="form-label">Password *</label>
+                        {{ form.password }}
+                        <span onclick="togglePassword('id_password')"
+                              class="position-absolute"
+                              style="right:14px;top:38px;cursor:pointer;
+                                     color:var(--text-muted);font-size:15px;">
+                            <i class="fa fa-eye" id="eye-password"></i>
+                        </span>
+                    </div>
+                    <small id="passwordHelp" class="d-block mb-3"
+                           style="font-size:12px;color:var(--text-muted);">
+                        Must be 8+ chars, include a number &amp; symbol
+                    </small>
+
+                    <!-- CONFIRM PASSWORD -->
+                    <div class="mb-4">
+                        <label class="form-label">Confirm Password *</label>
+                        {{ form.confirm_password }}
+                    </div>
+
+                    <!-- TERMS -->
+                    <div class="neu-pressed rounded px-3 py-2 mb-4 d-flex align-items-center gap-2">
+                        {{ form.terms }}
+                        <label class="mb-0" style="font-size:13px;cursor:pointer;">
+                            I agree to the
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal"
+                               style="color:var(--primary);font-weight:600;">
+                                Terms & Conditions
+                            </a>
+                        </label>
+                    </div>
+
+                    <!-- SUBMIT -->
+                    <button class="btn btn-primary w-100 py-2" id="registerBtn"
+                            style="border-radius:10px;font-size:15px;font-weight:700;">
+                        <i class="fa fa-user-plus me-2"></i>
+                        <span id="btnText">Create Account</span>
+                    </button>
+
+                    <!-- DIVIDER -->
+                    <div class="d-flex align-items-center my-4">
+                        <div style="flex:1;height:1px;background:var(--border);"></div>
+                        <span class="px-3 text-muted" style="font-size:13px;">OR</span>
+                        <div style="flex:1;height:1px;background:var(--border);"></div>
+                    </div>
+
+                    <!-- SOCIAL BUTTONS -->
+                    <div class="d-flex justify-content-center gap-3 mb-4">
+                        <a href="#" class="neu-raised d-flex align-items-center justify-content-center"
+                           style="width:46px;height:46px;border-radius:12px;"
+                           title="Google">
+                            <i class="fab fa-google" style="color:#ea4335;font-size:18px;"></i>
+                        </a>
+                        <a href="#" class="neu-raised d-flex align-items-center justify-content-center"
+                           style="width:46px;height:46px;border-radius:12px;"
+                           title="GitHub">
+                            <i class="fab fa-github" style="color:var(--text);font-size:18px;"></i>
+                        </a>
+                        <a href="#" class="neu-raised d-flex align-items-center justify-content-center"
+                           style="width:46px;height:46px;border-radius:12px;"
+                           title="LinkedIn">
+                            <i class="fab fa-linkedin-in" style="color:#0a66c2;font-size:18px;"></i>
+                        </a>
+                    </div>
+
+                    <p class="text-center mb-0" style="font-size:14px;color:var(--text-muted);">
+                        Already have an account?
+                        <a href="{% url 'login' %}" style="color:var(--primary);font-weight:700;">
+                            Login
+                        </a>
+                    </p>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TERMS MODAL -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa fa-file-contract me-2" style="color:var(--primary);"></i>
+                    Terms & Conditions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Welcome to CodeShelf!</strong></p>
+                <p>By using this platform, you agree to the following terms:</p>
+                <ul style="line-height:2;">
+                    <li>You will not redistribute purchased projects.</li>
+                    <li>Projects are for educational use only.</li>
+                    <li>Unauthorized sharing may lead to account suspension.</li>
+                    <li>All payments are non-refundable.</li>
+                </ul>
+                <p class="text-muted" style="font-size:13px;">
+                    We reserve the right to update these terms at any time.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal" style="border-radius:10px;">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary"
+                        onclick="acceptTerms()" style="border-radius:10px;">
+                    <i class="fa fa-check me-1"></i> Accept & Continue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function togglePassword(id) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    const icon = document.getElementById('eye-' + id.replace('id_', ''));
+    icon.className = input.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
+}
+
+document.getElementById('id_password').addEventListener('input', function () {
+    const val = this.value;
+    const msg = document.getElementById('passwordHelp');
+    if (val.length === 0) {
+        msg.textContent = 'Must be 8+ chars, include a number & symbol';
+        msg.style.color = 'var(--text-muted)';
+    } else if (val.length < 8) {
+        msg.textContent = '⚠ Too short — need at least 8 characters';
+        msg.style.color = '#f43f5e';
+    } else if (!/[0-9]/.test(val) || !/[!@#$%^&*]/.test(val)) {
+        msg.textContent = '⚠ Add a number & special symbol (!@#$%^&*)';
+        msg.style.color = '#f59e0b';
+    } else {
+        msg.textContent = '✓ Strong password';
+        msg.style.color = '#10b981';
+    }
+});
+
+function acceptTerms() {
+    const termsCheckbox = document.getElementById('id_terms');
+    termsCheckbox.checked = true;
+    termsCheckbox.dispatchEvent(new Event('change'));
+    bootstrap.Modal.getInstance(document.getElementById('termsModal')).hide();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const termsCheckbox = document.getElementById('id_terms');
+    const registerBtn = document.getElementById('registerBtn');
+
+    function checkTerms() {
+        if (termsCheckbox.checked) {
+            registerBtn.removeAttribute('disabled');
+            registerBtn.style.opacity = '1';
+        } else {
+            registerBtn.setAttribute('disabled', 'disabled');
+            registerBtn.style.opacity = '0.6';
+        }
+    }
+
+    if (termsCheckbox && registerBtn) {
+        termsCheckbox.addEventListener('change', checkTerms);
+        checkTerms();
+    }
+});
+</script>
+{% endblock %}

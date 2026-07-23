@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+
+    <h4 class="fw-bold mb-4" style="color:var(--text);"><i class="fa-solid fa-shopping-cart me-2" style="color:var(--primary);"></i>My Cart</h4>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if projects or courses %}
+
+    <div class="row g-4">
+
+        <!-- ── CART ITEMS ── -->
+        <div class="col-lg-8">
+
+            {% for project in projects %}
+            <div class="neu-raised rounded-3 mb-3 overflow-hidden"
+                 id="cart-item-project-{{ project.id }}"
+                 style="transition: all 0.3s var(--ease);">
+
+                <div class="row g-0 align-items-center">
+
+                    <!-- THUMBNAIL -->
+                    <div class="col-md-3 col-4">
+                        <img src="{{ project.thumbnail.url }}"
+                             class="img-fluid"
+                             style="height:110px;object-fit:cover;width:100%;
+                                    border-radius: calc(0.5rem - 1px) 0 0 calc(0.5rem - 1px);"
+                             alt="{{ project.title }}">
+                    </div>
+
+                    <!-- DETAILS -->
+                    <div class="col-md-6 col-8 px-3 py-3">
+                        <h6 class="fw-bold mb-1" style="color:var(--text);">
+                            {{ project.title }}
+                        </h6>
+                        <span class="badge bg-primary mb-2">{{ project.category }}</span>
+                        <p class="text-muted mb-0" style="font-size:13px;">
+                            <i class="fa fa-code me-1" style="color:var(--primary);"></i>
+                            {{ project.technology }}
+                        </p>
+                    </div>
+
+                    <!-- PRICE + REMOVE -->
+                    <div class="col-md-3 col-12 text-start text-md-end pt-2 pt-md-0 pe-3 pb-3 pb-md-0">
+                        <p class="fw-bold mb-2 ps-3 ps-md-0" style="color:#10b981;font-size:1rem;">
+                            ₹{{ project.price }}
+                        </p>
+                        <div class="ps-3 ps-md-0">
+                            <button class="btn btn-sm btn-outline-danger"
+                                    style="border-radius:8px;"
+                                    onclick="removeFromCart('project', {{ project.id }}, this)">
+                                <i class="fa-solid fa-trash-can"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for course in courses %}
+            <div class="neu-raised rounded-3 mb-3 overflow-hidden"
+                 id="cart-item-course-{{ course.id }}"
+                 style="transition: all 0.3s var(--ease);">
+
+                <div class="row g-0 align-items-center">
+
+                    <!-- THUMBNAIL -->
+                    <div class="col-md-3 col-4">
+                        <img src="{% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}"
+                             class="img-fluid"
+                             style="height:110px;object-fit:cover;width:100%;
+                                    border-radius: calc(0.5rem - 1px) 0 0 calc(0.5rem - 1px);"
+                             alt="{{ course.title }}">
+                    </div>
+
+                    <!-- DETAILS -->
+                    <div class="col-md-6 col-8 px-3 py-3">
+                        <h6 class="fw-bold mb-1" style="color:var(--text);">
+                            {{ course.title }}
+                        </h6>
+                        <span class="badge bg-info mb-2">Course</span>
+                        <p class="text-muted mb-0" style="font-size:13px;">
+                            <i class="fa fa-video me-1" style="color:var(--primary);"></i>
+                            {{ course.total_videos }} Videos
+                        </p>
+                    </div>
+
+                    <!-- PRICE + REMOVE -->
+                    <div class="col-md-3 col-12 text-start text-md-end pt-2 pt-md-0 pe-3 pb-3 pb-md-0">
+                        <p class="fw-bold mb-2 ps-3 ps-md-0" style="color:#10b981;font-size:1rem;">
+                            {% if course.is_free %}FREE{% else %}₹{{ course.price }}{% endif %}
+                        </p>
+                        <div class="ps-3 ps-md-0">
+                            <button class="btn btn-sm btn-outline-danger"
+                                    style="border-radius:8px;"
+                                    onclick="removeFromCart('course', {{ course.id }}, this)">
+                                <i class="fa-solid fa-trash-can"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- CLEAR CART -->
+            <div class="text-end mt-2">
+                <a href="{% url 'clear_cart' %}"
+                   class="btn btn-sm btn-outline-secondary"
+                   style="border-radius:8px;">
+                    <i class="fa-solid fa-broom me-1"></i> Clear Cart
+                </a>
+            </div>
+
+        </div>
+
+        <!-- ── ORDER SUMMARY ── -->
+        <div class="col-lg-4">
+            <div class="cart-summary">
+
+                <h5 class="fw-bold mb-4" style="color:var(--text);">Order Summary</h5>
+
+                 <!-- Items count -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted" style="font-size:14px;">Items</span>
+                    <span id="cart-items-count" class="neu-pressed rounded px-3 py-1 fw-semibold"
+                          style="font-size:14px;color:var(--text);">
+                        {{ cart_count }}
+                    </span>
+                </div>
+
+                <!-- Total -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="text-muted" style="font-size:14px;">Total</span>
+                    <span class="fw-bold" id="cart-total"
+                          style="font-size:1.25rem;color:#10b981;">
+                        ₹{{ total }}
+                    </span>
+                </div>
+
+                <!-- Divider -->
+                <div style="height:1px;background:rgba(var(--primary-rgb),0.1);margin-bottom:20px;"></div>
+
+                <!-- Checkout -->
+                <a href="{% url 'checkout' %}" class="btn btn-primary w-100 py-2 mb-2">
+                    Proceed to Checkout
+                    <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+
+                <!-- Continue browsing -->
+                <a href="{% url 'project_list' %}"
+                   class="btn btn-outline-secondary w-100 py-2">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Continue Browsing
+                </a>
+
+                <!-- Trust badges -->
+                <div class="mt-4 d-flex flex-column gap-2">
+                    <div class="d-flex align-items-center gap-2"
+                         style="font-size:12px;color:var(--text-muted);">
+                        <div class="neu-pressed rounded d-flex align-items-center justify-content-center"
+                             style="width:28px;height:28px;flex-shrink:0;">
+                            <i class="fa fa-lock" style="font-size:11px;color:var(--primary);"></i>
+                        </div>
+                        Secure checkout via Razorpay
+                    </div>
+                    <div class="d-flex align-items-center gap-2"
+                         style="font-size:12px;color:var(--text-muted);">
+                        <div class="neu-pressed rounded d-flex align-items-center justify-content-center"
+                             style="width:28px;height:28px;flex-shrink:0;">
+                            <i class="fa fa-download" style="font-size:11px;color:var(--primary);"></i>
+                        </div>
+                        Instant download after payment
+                    </div>
+                    <div class="d-flex align-items-center gap-2"
+                         style="font-size:12px;color:var(--text-muted);">
+                        <div class="neu-pressed rounded d-flex align-items-center justify-content-center"
+                             style="width:28px;height:28px;flex-shrink:0;">
+                            <i class="fa fa-headset" style="font-size:11px;color:var(--primary);"></i>
+                        </div>
+                        24/7 support available
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- EMPTY CART -->
+    <div class="neu-raised rounded p-5 text-center" style="max-width:480px;margin:0 auto;">
+        <div class="stat-icon mx-auto mb-4" style="width:72px;height:72px;">
+            <i class="fa-solid fa-cart-shopping"
+               style="font-size:28px;color:var(--text-muted);"></i>
+        </div>
+        <h5 class="fw-bold mb-2" style="color:var(--text);">Your cart is empty!</h5>
+        <p class="text-muted mb-4" style="font-size:14px;">
+            Browse projects and courses to add them to your cart.
+        </p>
+        <div class="d-flex gap-2 justify-content-center">
+            <a href="{% url 'project_list' %}" class="btn btn-primary">
+                <i class="fa fa-search me-1"></i> Browse Projects
+            </a>
+            <a href="{% url 'course_list' %}" class="btn btn-outline-primary">
+                <i class="fa fa-play me-1"></i> Browse Courses
+            </a>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function removeFromCart(itemType, itemId, btn) {
+    /* Visual feedback — show spinner on button */
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+    fetch(`/cart/remove/${itemType}/${itemId}/`, {
+        method: 'GET',
+        headers: { 'x-requested-with': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'removed') {
+            /* Fade out the card */
+            const item = document.getElementById(`cart-item-${itemType}-${itemId}`);
+            item.style.opacity    = '0';
+            item.style.transform  = 'translateX(20px)';
+            item.style.transition = 'all 0.35s ease';
+            setTimeout(() => item.remove(), 350);
+
+            /* Update total */
+            document.getElementById('cart-total').innerText = '₹' + data.total;
+
+            /* Update header cart count */
+            const cartBadge = document.getElementById('cart-count');
+            if (cartBadge) {
+                cartBadge.textContent = data.cart_count;
+                if (data.cart_count > 0) {
+                    cartBadge.style.display = 'flex';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+            }
+
+            /* Update page summary cart count */
+            const summaryCount = document.getElementById('cart-items-count');
+            if (summaryCount) {
+                summaryCount.textContent = data.cart_count;
+            }
+
+            /* Reload if cart is empty */
+            if (data.cart_count === 0) {
+                setTimeout(() => location.reload(), 400);
+            }
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Remove';
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Remove';
+    });
+}
+</script>
+{% endblock %}

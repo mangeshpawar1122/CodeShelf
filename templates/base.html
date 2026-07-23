@@ -1,0 +1,758 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <title>CodeShelf</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="{% static 'img/favicon.ico' %}" rel="icon">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}?v=1.2" rel="stylesheet">
+    <link href="{% static 'css/neumorphism.css' %}?v=1.2" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<!-- Spinner -->
+<div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+    <div class="spinner-border text-primary"></div>
+</div>
+
+{% block navbar %}
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg sticky-top" id="mainNavbar">
+    <div class="container-fluid px-3 px-lg-5">
+
+        <!-- LOGO -->
+        <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center gap-2">
+            <div class="brand-icon">
+                <i class="fa-solid fa-code"></i>
+            </div>
+            <span class="brand-text">Code<span class="brand-accent">Shelf</span></span>
+        </a>
+
+        
+
+        <!-- MOBILE ACTIONS (Search + Hamburger) -->
+        <div class="d-flex align-items-center gap-3 d-lg-none">
+            <button class="nav-icon-btn" id="mobileSearchBtnTop" title="Search" style="width: 42px; height: 42px; position: relative;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <div class="dropdown">
+                <button class="navbar-toggler dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="true"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end cs-dropdown" style="margin-top: 14px; width: 280px;">
+                    {% if user.is_authenticated %}
+                        <li class="dropdown-header">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if user.profile.profile_image %}
+                                        <img src="{{ user.profile.profile_image.url }}" width="44" height="44" class="rounded-circle" style="box-shadow:var(--neu-raised);">
+                                    {% else %}
+                                        <div class="avatar-initials" style="width:44px;height:44px;font-size:16px;">
+                                            {{ user.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold" style="font-size:14px;color:var(--text);">{{ user.username }}</div>
+                                        <div style="font-size:11px;color:var(--text-muted);">{{ user.email }}</div>
+                                        <span class="role-badge mt-1">{{ user.profile.role|capfirst }}</span>
+                                    </div>
+                                </div>
+                                <button class="theme-toggle btn btn-sm p-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: transparent; border: none; font-size: 18px;" title="Toggle Theme">
+                                    <i class="fa-solid fa-moon text-muted"></i>
+                                </button>
+                            </div>
+                        </li>
+                        <li><div class="dropdown-divider"></div></li>
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'profile' %}">
+                                <i class="fa-solid fa-user-circle"></i> My Profile
+                            </a>
+                        </li>
+                        {% if user.profile.role == 'seller' %}
+                        <li><a class="dropdown-item cs-item" href="{% url 'seller_dashboard' %}"><i class="fa-solid fa-chart-line"></i> Seller Dashboard</a></li>
+                        <li><a class="dropdown-item cs-item" href="{% url 'upload_project' %}"><i class="fa-solid fa-upload"></i> Upload Project</a></li>
+                        {% else %}
+                        <li><a class="dropdown-item cs-item" href="{% url 'customer_dashboard' %}"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a></li>
+                        <li><a class="dropdown-item cs-item" href="{% url 'order_history' %}"><i class="fa-solid fa-box"></i> My Orders</a></li>
+                        <li><a class="dropdown-item cs-item" href="{% url 'wishlist' %}"><i class="fa-solid fa-heart"></i> Wishlist</a></li>
+                        <li><a class="dropdown-item cs-item" href="{% url 'coupons' %}"><i class="fa-solid fa-ticket"></i> My Coupons</a></li>
+                        {% endif %}
+                        <li><div class="dropdown-divider"></div></li>
+                        <li>
+                            <a class="dropdown-item cs-item danger" href="{% url 'logout' %}">
+                                <i class="fa-solid fa-right-from-bracket"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="dropdown-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold">Welcome</h6>
+                            <button class="theme-toggle btn btn-sm p-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: transparent; border: none; font-size: 18px;" title="Toggle Theme">
+                                <i class="fa-solid fa-moon text-muted"></i>
+                            </button>
+                        </li>
+                        <li><div class="dropdown-divider"></div></li>
+                        <li><a class="dropdown-item cs-item" href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a></li>
+                        <li><a class="dropdown-item cs-item" href="{% url 'register' %}"><i class="fa-solid fa-user-plus"></i> Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+
+            <!-- LEFT NAV LINKS -->
+            <div class="navbar-nav me-auto align-items-center gap-1 ms-lg-4">
+                <a href="{% url 'home' %}" class="nav-link nav-pill {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                <a href="{% url 'project_list' %}" class="nav-link nav-pill {% if request.resolver_match.url_name == 'project_list' %}active{% endif %}">Projects</a>
+                <a href="{% url 'course_list' %}" class="nav-link nav-pill {% if request.resolver_match.url_name == 'course_list' %}active{% endif %}">Courses</a>
+                <a href="{% url 'about' %}" class="nav-link nav-pill {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+                <a href="{% url 'contact' %}" class="nav-link nav-pill {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div class="d-flex align-items-center gap-3">
+
+                <!-- ICONS ROW -->
+                <div class="mobile-icon-row d-flex align-items-center gap-2 ms-auto me-2">
+                    {% if user.is_authenticated and user.profile.is_customer %}
+                    <a href="{% url 'wishlist' %}" class="nav-icon-btn" title="Wishlist">
+                        <i class="fa-solid fa-heart"></i>
+                        <span id="wishlist-count" class="nav-badge"
+                            style="{% if not wishlist_count %}display:none;{% endif %}">
+                            {{ wishlist_count }}
+                        </span>
+                    </a>
+                    <a href="{% url 'cart' %}" class="nav-icon-btn" title="Cart">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span id="cart-count" class="nav-badge"
+                            style="{% if not cart_count or cart_count == 0 %}display:none;{% endif %}">
+                            {{ cart_count }}
+                        </span>
+                    </a>
+                    {% endif %}
+                    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    </button>
+                </div>
+
+                <!-- SEARCH -->
+                <form class="search-form d-flex align-items-center" id="globalSearchForm" onsubmit="return false;">
+                    <div class="search-wrap position-relative" id="searchWrap" style="flex-grow:1;">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input class="search-input" type="search" name="q"
+                               id="navSearchInput"
+                               placeholder="Search globally..."
+                               value=""
+                               autocomplete="off">
+                        <!-- CLEAR ICON -->
+                        <i class="bi bi-x-circle-fill" id="navSearchClear"
+                           style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text-muted);z-index:10;font-size:16px;"></i>
+                        <div id="search-suggestions" class="cs-dropdown"
+                             style="display:none;position:absolute;top:calc(100% + 8px);
+                                    left:0;width:100%;min-width:300px;z-index:9999;
+                                    max-height:450px;overflow-y:auto;padding:8px;">
+                        </div>
+                    </div>
+                </form>
+
+                <!-- AUTH -->
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                <button class="avatar-btn" id="profileDropdown"
+        data-bs-toggle="dropdown"
+        data-bs-auto-close="true"
+        aria-expanded="false">
+    {% if user.profile.profile_image %}
+        <img src="{{ user.profile.profile_image.url }}"
+             width="36" height="36" class="rounded-circle"
+             style="box-shadow:var(--neu-raised);">
+    {% else %}
+        <div class="avatar-initials">{{ user.username|first|upper }}</div>
+    {% endif %}
+    <span class="avatar-status"></span>
+  <span class="avatar-username">{{ user.username }}</span>
+</button>
+
+                    <ul class="dropdown-menu dropdown-menu-end cs-dropdown" aria-labelledby="profileDropdown">
+                        <li class="dropdown-header">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if user.profile.profile_image %}
+                                    <img src="{{ user.profile.profile_image.url }}"
+                                         width="44" height="44" class="rounded-circle"
+                                         style="box-shadow:var(--neu-raised);">
+                                {% else %}
+                                    <div class="avatar-initials" style="width:44px;height:44px;font-size:16px;">
+                                        {{ user.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold" style="font-size:14px;color:var(--text);">{{ user.username }}</div>
+                                    <div style="font-size:11px;color:var(--text-muted);">{{ user.email }}</div>
+                                    <span class="role-badge mt-1">{{ user.profile.role|capfirst }}</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li><div class="dropdown-divider"></div></li>
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'profile' %}">
+                                <i class="fa-solid fa-user-circle"></i> My Profile
+                            </a>
+                        </li>
+                        {% if user.profile.role == 'seller' %}
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'seller_dashboard' %}">
+                                <i class="fa-solid fa-chart-line"></i> Seller Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'upload_project' %}">
+                                <i class="fa-solid fa-upload"></i> Upload Project
+                            </a>
+                        </li>
+                        {% else %}
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'customer_dashboard' %}">
+                                <i class="fa-solid fa-table-cells-large"></i> Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'order_history' %}">
+                                <i class="fa-solid fa-box"></i> My Orders
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'wishlist' %}">
+                                <i class="fa-solid fa-heart"></i> Wishlist
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item cs-item" href="{% url 'coupons' %}">
+                                <i class="fa-solid fa-ticket"></i> My Coupons
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li><div class="dropdown-divider"></div></li>
+                        <li>
+                            <a class="dropdown-item cs-item danger" href="{% url 'logout' %}">
+                                <i class="fa-solid fa-right-from-bracket"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {% else %}
+                <a href="{% url 'login' %}" class="btn-login">Login</a>
+                <a href="{% url 'register' %}" class="btn-register">
+                    <i class="fa-solid fa-user-plus me-1"></i> Sign Up
+                </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- ================= END NAVBAR ================= -->
+
+<!-- ================= MOBILE BOTTOM NAV ================= -->
+<nav class="mobile-bottom-nav d-lg-none">
+    <div class="mbn-bottom-row">
+        <a href="{% url 'home' %}" class="mbn-tab {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'course_list' %}" class="mbn-tab {% if request.resolver_match.url_name == 'course_list' %}active{% endif %}">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Courses</span>
+        </a>
+        <a href="{% url 'project_list' %}" class="mbn-tab {% if request.resolver_match.url_name == 'project_list' %}active{% endif %}">
+            <i class="fa-solid fa-code"></i>
+            <span>Projects</span>
+        </a>
+        <a href="{% url 'cart' %}" class="mbn-tab position-relative {% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Cart</span>
+            <span id="mobile-bottom-cart-count" class="nav-badge" style="top: -6px; right: calc(50% - 20px); {% if not cart_count or cart_count == 0 %}display:none;{% endif %}">{{ cart_count }}</span>
+        </a>
+    </div>
+</nav>
+
+<!-- MOBILE SEARCH OVERLAY -->
+<div class="mobile-search-overlay d-lg-none" id="mobileSearchOverlay">
+    <div class="mso-header">
+        <i class="fa-solid fa-magnifying-glass text-muted ms-3"></i>
+        <input type="text" id="mobileSearchInputOverlay" placeholder="Search globally..." class="form-control shadow-none bg-transparent border-0 text-body" autocomplete="off" style="font-size: 16px;">
+        <button class="btn btn-link text-body me-2" id="closeMobileSearch" style="text-decoration: none;"><i class="fa-solid fa-xmark fs-4"></i></button>
+    </div>
+    <div id="mobile-search-suggestions" class="mso-body p-3" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+        <!-- Results inject here -->
+    </div>
+</div>
+
+{% endblock navbar %}
+
+{% block content %}{% endblock %}
+
+{% block footer %}
+<!-- ================= FOOTER ================= -->
+<footer class="cs-footer">
+    <div style="margin-top:-2px;">
+        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+             style="display:block;width:100%;height:60px;">
+            <path d="M0,30 C360,60 1080,0 1440,30" fill="none" stroke="var(--primary)" stroke-width="8" />
+            <path d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z" fill="var(--bg)" />
+        </svg>
+    </div>
+    <div class="container pb-5 pt-5">
+        <div class="row g-5">
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="brand-icon small"><i class="fa-solid fa-code"></i></div>
+                    <span class="brand-text fs-5">Code<span class="brand-accent">Shelf</span></span>
+                </div>
+                <p class="footer-desc mb-4">
+                    Your go-to platform for ready-made coding projects.
+                    Learn faster, build smarter, and download complete solutions.
+                </p>
+                <div class="d-flex gap-3 mb-4">
+                    <div style="text-align:center;">
+                        <div style="font-size:1.3rem;font-weight:900;color:var(--primary);font-family:'Nunito',sans-serif;">{{ footer_total_projects|default:"500" }}+</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.45);">Projects</div>
+                    </div>
+                    <div style="width:1px;background:rgba(6,187,204,0.2);"></div>
+                    <div style="text-align:center;">
+                        <div style="font-size:1.3rem;font-weight:900;color:var(--primary);font-family:'Nunito',sans-serif;">{{ footer_total_users|default:"2000" }}+</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.45);">Users</div>
+                    </div>
+                    <div style="width:1px;background:rgba(6,187,204,0.2);"></div>
+                    <div style="text-align:center;">
+                        <div style="font-size:1.3rem;font-weight:900;color:var(--primary);font-family:'Nunito',sans-serif;">{{ footer_total_sellers|default:"50" }}+</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.45);">Sellers</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a class="footer-social" href="https://facebook.com/codeshelf" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a class="footer-social" href="https://twitter.com/codeshelf" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a class="footer-social" href="https://linkedin.com/company/codeshelf" target="_blank"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a class="footer-social" href="https://instagram.com/codeshelf" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a class="footer-social" href="https://github.com/codeshelf" target="_blank"><i class="fa-brands fa-github"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="footer-heading">Platform</h6>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'project_list' %}">Projects</a></li>
+                    <li><a href="{% url 'course_list' %}">Courses</a></li>
+                    <li><a href="{% url 'about' %}">About Us</a></li>
+                    <li><a href="{% url 'contact' %}">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="footer-heading">Legal</h6>
+                <ul class="footer-links">
+                    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+                    <li><a href="{% url 'terms' %}">Terms of Service</a></li>
+                    <li><a href="{% url 'refund_policy' %}">Refund Policy</a></li>
+                    <li><a href="{% url 'faq' %}">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <h6 class="footer-heading">Get In Touch</h6>
+                <div class="footer-contact mb-4">
+                    <div class="contact-item">
+                        <div class="footer-contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <span>Pune, Maharashtra, India</span>
+                    </div>
+                    <div class="contact-item">
+                        <div class="footer-contact-icon"><i class="fa-solid fa-phone"></i></div>
+                        <span>+91 XXXXXXXX</span>
+                    </div>
+                    <div class="contact-item">
+                        <div class="footer-contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                        <span>info@codeshelf.com</span>
+                    </div>
+                </div>
+                <h6 class="footer-heading">Stay Updated</h6>
+                <p style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:12px;">
+                    Get notified about new projects and updates.
+                </p>
+                <div class="newsletter-form">
+                    <input type="email" id="newsletterEmail" placeholder="Enter your email" class="newsletter-input">
+                    <button class="newsletter-btn" id="newsletterBtn" title="Subscribe">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="row align-items-center py-3 g-2">
+                <div class="col-md-5 text-center text-md-start">
+                    <small>© 2026 <span style="color:var(--primary);font-weight:700;">CodeShelf</span>. All Rights Reserved.</small>
+                </div>
+                <div class="col-md-4 text-center">
+                    <small style="color:rgba(255,255,255,0.25);">
+                        Built with
+                        <i class="fa-brands fa-python" style="color:var(--primary);"></i> Django &
+                        <i class="fa-brands fa-bootstrap" style="color:#7952b3;"></i> Bootstrap
+                    </small>
+                </div>
+                <div class="col-md-3 text-center text-md-end">
+                    <small>Made with <i class="fa-solid fa-heart text-danger"></i> in Pune</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock footer %}
+
+<a href="#" class="back-to-top" id="backToTop">
+    <i class="bi bi-arrow-up"></i>
+</a>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'lib/wow/wow.min.js' %}"></script>
+<script src="{% static 'lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+<script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+<script src="https://kit.fontawesome.com/3f2c27085b.js" crossorigin="anonymous"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+    const $searchInput = $('#navSearchInput');
+    const $searchSuggestions = $('#search-suggestions');
+    const $searchClear = $('#navSearchClear');
+    let searchTimeout;
+
+    function toggleClearIcon() {
+        if ($searchInput.val().length > 0) {
+            $searchClear.show();
+        } else {
+            $searchClear.hide();
+        }
+    }
+
+    $searchInput.on('input', function() {
+        toggleClearIcon();
+        const query = $(this).val().trim();
+        clearTimeout(searchTimeout);
+
+        if (query.length < 2) {
+            $searchSuggestions.hide();
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            $.ajax({
+                url: "{% url 'global_search' %}",
+                data: { 'q': query },
+                success: function(html) {
+                    $searchSuggestions.html(html).show();
+                },
+                error: function(err) {
+                    console.error("Search error:", err);
+                }
+            });
+        }, 250); // Debounce time
+    });
+
+    $searchClear.on('click', function() {
+        $searchInput.val('');
+        toggleClearIcon();
+        $searchSuggestions.hide();
+        $searchInput.focus();
+    });
+
+    // Close when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#searchWrap').length) {
+            $searchSuggestions.hide();
+        }
+    });
+
+    // Reopen when clicking on input if it has text
+    $searchInput.on('focus', function() {
+        toggleClearIcon();
+        if ($(this).val().trim().length >= 2 && $searchSuggestions.children().length > 0) {
+            $searchSuggestions.show();
+        }
+    });
+
+    // Mobile Search Overlay Logic
+    const $mobileSearchBtn = $('#mobileSearchBtnTop');
+    const $mobileSearchOverlay = $('#mobileSearchOverlay');
+    const $closeMobileSearch = $('#closeMobileSearch');
+    const $mobileSearchInputOverlay = $('#mobileSearchInputOverlay');
+    const $mobileSearchSuggestions = $('#mobile-search-suggestions');
+    let mobileSearchTimeout;
+
+    $mobileSearchBtn.on('click', function(e) {
+        e.preventDefault();
+        $mobileSearchOverlay.addClass('show');
+        setTimeout(() => $mobileSearchInputOverlay.focus(), 100);
+    });
+
+    $closeMobileSearch.on('click', function(e) {
+        e.preventDefault();
+        $mobileSearchOverlay.removeClass('show');
+    });
+
+    $mobileSearchInputOverlay.on('input', function() {
+        const query = $(this).val().trim();
+        clearTimeout(mobileSearchTimeout);
+
+        if (query.length < 2) {
+            $mobileSearchSuggestions.html('');
+            return;
+        }
+
+        mobileSearchTimeout = setTimeout(() => {
+            $.ajax({
+                url: "{% url 'global_search' %}",
+                data: { 'q': query },
+                success: function(html) {
+                    $mobileSearchSuggestions.html(html);
+                },
+                error: function(err) {
+                    console.error("Search error:", err);
+                }
+            });
+        }, 250);
+    });
+
+    function showToast(message, actionUrl = null, actionText = 'View', iconClass = 'fa-check-circle', iconColor = 'var(--primary)') {
+        const toastEl = document.getElementById('actionToast');
+        
+        document.getElementById('toastMessage').innerText = message;
+        
+        const iconEl = document.getElementById('toastIcon');
+        iconEl.className = 'fa-solid ' + iconClass + ' fs-4 me-3';
+        iconEl.style.color = iconColor;
+        
+        const btnContainer = document.getElementById('toastActionBtnContainer');
+        if (actionUrl) {
+            const actionBtn = document.getElementById('toastActionBtn');
+            actionBtn.href = actionUrl;
+            btnContainer.style.display = 'block';
+        } else {
+            btnContainer.style.display = 'none';
+        }
+        
+        const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+        toast.show();
+    }
+
+    // Buy trigger animation & AJAX Cart
+    $(document).on('click', '.buy-trigger, .ajax-add-to-cart', function(e) {
+        e.preventDefault();
+        var targetUrl = $(this).attr('href');
+        var btn = this;
+        
+        if (targetUrl.includes('login')) {
+            window.location.href = targetUrl;
+            return;
+        }
+
+        fetch(targetUrl, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'added') {
+                showToast('Added to Cart!', "{% url 'cart' %}", 'View Cart', 'fa-check-circle', '#10b981');
+                // Update cart count if exists
+                const cartBadge = document.getElementById('cart-count');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_count;
+                    if (data.cart_count > 0) {
+                        cartBadge.style.display = 'flex';
+                    } else {
+                        cartBadge.style.display = 'none';
+                    }
+                }
+                btn.style.backgroundColor = '#10b981';
+                btn.style.borderColor = '#10b981';
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-cart-plus', 'fa-shopping-cart');
+                    icon.classList.add('fa-check');
+                }
+            } else if (data.status === 'already_in_cart') {
+                window.location.href = "{% url 'cart' %}";
+            } else if (data.status === 'already_purchased') {
+                showToast('Already Purchased!', null, null, 'fa-info-circle', '#6366f1');
+                btn.style.backgroundColor = '#6366f1';
+                btn.style.borderColor = '#6366f1';
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-cart-plus', 'fa-shopping-cart', 'fa-check');
+                    icon.classList.add('fa-bag-shopping');
+                }
+            }
+        })
+        .catch(err => console.error('Cart error:', err));
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Wishlist AJAX
+    $(document).on('click', '.wishlist-btn[data-id]', function(e) {
+        e.preventDefault();
+        const btn = this;
+        const itemId = btn.dataset.id;
+        const itemType = btn.dataset.type || 'project';
+        const icon = btn.querySelector('i');
+        
+        fetch("{% url 'toggle_wishlist' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `item_id=${itemId}&item_type=${itemType}`
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
+        .then(data => {
+            if (data.status === 'added') {
+                icon.classList.remove('fa-regular', 'fa-heart-o');
+                icon.classList.add('fa-solid', 'fa-heart');
+                if (btn.classList.contains('btn-outline-danger')) {
+                    icon.classList.add('text-danger');
+                    // update text if present
+                    if(btn.textContent.includes('Wishlist')) {
+                        btn.innerHTML = btn.innerHTML.replace('Wishlist', 'Wishlisted');
+                    }
+                } else {
+                    icon.style.color = '#fff';
+                }
+                showToast('Added to Wishlist!', "{% url 'wishlist' %}", 'View Wishlist', 'fa-heart', '#ff5f56');
+            } else {
+                icon.classList.remove('fa-solid', 'fa-heart', 'text-danger');
+                if (btn.classList.contains('btn-outline-danger')) {
+                    icon.classList.add('fa-regular', 'fa-heart');
+                    if(btn.textContent.includes('Wishlisted')) {
+                        btn.innerHTML = btn.innerHTML.replace('Wishlisted', 'Wishlist');
+                    }
+                } else {
+                    icon.classList.add('fa-regular', 'fa-heart');
+                    icon.style.color = '#fff';
+                }
+                showToast('Removed from Wishlist!', null, null, 'fa-heart-crack', '#6c757d');
+            }
+            const countEl = document.getElementById('wishlist-count');
+            if (countEl) {
+                if (data.wishlist_count > 0) {
+                    countEl.textContent = data.wishlist_count;
+                    countEl.style.display = 'inline';
+                } else {
+                    countEl.style.display = 'none';
+                }
+            }
+        })
+        .catch(err => console.error('Wishlist error:', err));
+    });
+
+    // Newsletter AJAX
+    $('#newsletterBtn').on('click', function(e) {
+        e.preventDefault();
+        const email = $('#newsletterEmail').val().trim();
+        const btn = $(this);
+        const originalIcon = btn.html();
+        
+        if (!email) {
+            showToast('Please enter your email', null, null, 'fa-exclamation-circle', '#f59e0b');
+            return;
+        }
+        
+        btn.html('<i class="fa-solid fa-spinner fa-spin"></i>');
+        btn.prop('disabled', true);
+        
+        $.ajax({
+            url: "{% url 'subscribe_newsletter' %}",
+            method: "POST",
+            data: {
+                'email': email,
+                'csrfmiddlewaretoken': getCookie('csrftoken') || '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    showToast(response.message, null, null, 'fa-check-circle', '#10b981');
+                    $('#newsletterEmail').val('');
+                } else if (response.status === 'info') {
+                    showToast(response.message, null, null, 'fa-info-circle', '#0dcaf0');
+                    $('#newsletterEmail').val('');
+                } else {
+                    showToast(response.message, null, null, 'fa-exclamation-circle', '#ef4444');
+                }
+            },
+            error: function() {
+                showToast('An error occurred. Please try again.', null, null, 'fa-exclamation-circle', '#ef4444');
+            },
+            complete: function() {
+                btn.html(originalIcon);
+                btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container position-fixed bottom-0 end-0 p-4" style="z-index: 1055;">
+    <div id="actionToast" class="toast border-0 p-3" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: var(--bg-card); color: var(--text); border-radius: 16px; box-shadow: var(--neu-raised-lg); min-width: 300px;">
+        <div class="d-flex align-items-center">
+            <i id="toastIcon" class="fa-solid fa-check-circle fs-4 me-3" style="color: var(--primary);"></i>
+            <div class="toast-body p-0 fw-bold fs-6 flex-grow-1" id="toastMessage">
+                Action successful!
+            </div>
+            <div id="toastActionBtnContainer" class="me-3" style="display: none;">
+                <a href="#" id="toastActionBtn" class="btn btn-sm btn-light rounded-circle d-flex justify-content-center align-items-center" style="width: 28px; height: 28px; background: var(--bg-subtle); border: 1px solid rgba(0,0,0,0.05); box-shadow: var(--neu-pressed);"><i class="fa-solid fa-chevron-right" style="color: var(--text);"></i></a>
+            </div>
+            <button type="button" class="btn btn-sm btn-light rounded-circle d-flex justify-content-center align-items-center" data-bs-dismiss="toast" aria-label="Close" style="width: 28px; height: 28px; background: var(--bg-subtle); border: 1px solid rgba(0,0,0,0.05); box-shadow: var(--neu-pressed); padding: 0;">
+                <i class="fa-solid fa-xmark" style="color: var(--text-muted);"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

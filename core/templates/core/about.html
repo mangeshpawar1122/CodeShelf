@@ -1,0 +1,402 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* =========================================
+       FEATURE CARDS — neumorphism
+    ========================================= */
+    .feature-card {
+        background: var(--neu-bg);
+        box-shadow: var(--neu-raised);
+        border: none;
+        border-radius: 20px;
+        padding: 40px 30px;
+        transition: box-shadow 0.4s var(--ease), transform 0.4s var(--ease);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--neu-raised-lg);
+    }
+    .feature-card::after {
+        content: ''; position: absolute; top: 0; right: 0;
+        width: 120px; height: 120px; background: var(--primary);
+        opacity: 0.05; border-bottom-left-radius: 100%;
+        z-index: -1; transition: all 0.4s ease;
+    }
+    .feature-card:hover::after { transform: scale(1.5); opacity: 0.1; }
+
+    .feature-icon-box {
+        width: 80px; height: 80px; border-radius: 20px;
+        background: var(--neu-bg);
+        box-shadow: var(--neu-raised);
+        color: var(--primary);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.2rem; margin-bottom: 1.5rem; transition: all 0.4s ease;
+    }
+    .feature-card:hover .feature-icon-box {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        box-shadow: var(--neu-pressed), 0 4px 16px rgba(6,187,204,0.3);
+        color: #fff; transform: rotate(-10deg);
+    }
+
+    /* =========================================
+       MISSION & VISION CARDS — neumorphism
+    ========================================= */
+    .mission-card {
+        background: var(--neu-bg);
+        box-shadow: var(--neu-raised);
+        border: none;
+        border-radius: 16px;
+        transition: box-shadow 0.3s var(--ease);
+    }
+    .mission-card:hover {
+        box-shadow: var(--neu-pressed);
+    }
+
+    /* =========================================
+       FLOATING IMAGE
+    ========================================= */
+    .floating-about-img {
+        animation: floatImg 6s ease-in-out infinite;
+        border-radius: 24px;
+        box-shadow: var(--neu-raised-lg);
+    }
+    @keyframes floatImg {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+
+    /* =========================================
+       BADGE
+    ========================================= */
+    .badge-soft-primary {
+        background-color: rgba(6, 187, 204, 0.15) !important;
+        color: var(--primary) !important;
+        border: 1px solid rgba(6, 187, 204, 0.3) !important;
+    }
+
+    /* =========================================
+       TEAM SECTION — unchanged (image-based)
+    ========================================= */
+    .team-section {
+        position: relative; padding-block: 5rem;
+        text-align: center; width: 100%; margin-inline: auto; overflow: hidden;
+    }
+    .team-watermark {
+        color: rgba(6, 187, 204, 0.05);
+        font-size: clamp(5rem, 15vw, 18rem); font-weight: 800;
+        position: absolute; z-index: 0; left: 50%; top: 0;
+        transform: translateX(-50%); user-select: none;
+        letter-spacing: 0.5rem; text-transform: uppercase; pointer-events: none;
+    }
+    .team-cards-grid {
+        margin-top: 5rem;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem; position: relative; z-index: 1; padding-bottom: 3rem;
+    }
+    @media screen and (min-width: 800px) { .team-cards-grid { gap: 1.5rem; } }
+    .team-member-card {
+        position: relative; cursor: pointer; border-radius: 12px; z-index: 1;
+    }
+    .team-member-card::before {
+        position: absolute; content: ""; width: 5rem; height: 6.25rem; z-index: -1;
+        transition: 0.3s ease-in-out;
+        background: linear-gradient(to left, #06BBCC, #4facfe);
+        top: -0.5rem; left: -0.5rem; border-radius: 8px;
+    }
+    .team-member-card::after {
+        position: absolute; inset: 0; content: ""; width: 100%; height: 100%;
+        border-radius: 12px;
+        background: linear-gradient(to bottom, rgba(30,41,59,0.1), rgba(0,0,0,0.9));
+        pointer-events: none;
+    }
+    .team-member-card img {
+        width: 100%; aspect-ratio: 3/4; object-fit: cover;
+        border-radius: 12px; filter: grayscale(100%); transition: 0.5s ease;
+    }
+    .team-member-card:hover img { filter: grayscale(0%); }
+    .team-member-card:hover::before { transform: scale(1.05); }
+    .team-member-content {
+        position: absolute; bottom: 0; z-index: 99; left: 0;
+        color: #fff; width: 100%; padding: 1.5rem 1rem; text-align: center;
+    }
+    .team-member-content h3 {
+        font-size: clamp(1.1rem, 1rem + 0.3vw, 1.3rem); font-weight: 500;
+        color: #fff; text-transform: capitalize; margin-bottom: 0.2rem;
+    }
+    .team-member-content p {
+        font-size: clamp(0.75rem, 0.7rem + 0.2vw, 0.9rem);
+        letter-spacing: 0.1rem; font-weight: 400;
+        color: var(--primary); text-transform: uppercase; margin-bottom: 0;
+    }
+    .team-member-content ul {
+        display: flex; align-items: center; justify-content: center;
+        gap: 0.8rem; margin-top: 1rem; padding-left: 0; list-style: none;
+    }
+    .team-member-content ul i { color: rgba(255,255,255,0.7); font-size: 1.2rem; transition: 0.3s; }
+    .team-member-content ul i:hover { color: var(--primary); }
+    @media screen and (min-width: 800px) {
+        .team-member-card:nth-child(even) { transform: translateY(15%); }
+        .team-member-card:nth-child(even)::before { bottom: -0.5rem; left: -0.5rem; top: auto; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated and user.profile.role == 'seller' %}
+<!-- HERO BANNER FOR SELLERS -->
+<div class="container-fluid py-5 mb-5"
+     style="background: linear-gradient(rgba(12,16,34,0.85), rgba(12,16,34,0.85)),
+            url('{% static "img/carousel-1.jpg" %}') center/cover;
+            min-height:40vh; display:flex; align-items:center;">
+    <div class="container text-center text-white pt-5">
+        <span class="badge badge-soft-primary px-3 py-2 rounded-pill mb-3 fs-6">
+            Grow Your Business
+        </span>
+        <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown text-white">
+            Sell on <span style="color:var(--primary);">CodeShelf</span>
+        </h1>
+        <p class="fs-5 text-light opacity-75 mx-auto animate__animated animate__fadeInUp"
+           style="max-width:600px;">
+            The premier marketplace for software developers to monetize their projects, templates, and tech courses.
+        </p>
+    </div>
+</div>
+{% else %}
+<!-- HERO BANNER -->
+<div class="container-fluid py-5 mb-5"
+     style="background: linear-gradient(rgba(12,16,34,0.85), rgba(12,16,34,0.85)),
+            url('{% static "img/carousel-1.jpg" %}') center/cover;
+            min-height:40vh; display:flex; align-items:center;">
+    <div class="container text-center text-white pt-5">
+        <span class="badge badge-soft-primary px-3 py-2 rounded-pill mb-3 fs-6">
+            Discover Our Story
+        </span>
+        <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown text-white">
+            About <span style="color:var(--primary);">CodeShelf</span>
+        </h1>
+        <p class="fs-5 text-light opacity-75 mx-auto animate__animated animate__fadeInUp"
+           style="max-width:600px;">
+            Your premium marketplace for ready-to-use, production-grade coding projects and development resources.
+        </p>
+    </div>
+</div>
+{% endif %}
+
+{% if user.is_authenticated and user.profile.role == 'seller' %}
+<!-- WHO WE ARE FOR SELLERS -->
+<div class="container py-5">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6 mb-4 mb-lg-0 text-center">
+            <img src="{% static 'img/about.jpg' %}"
+                 class="img-fluid floating-about-img w-100"
+                 style="max-height:500px;object-fit:cover;"
+                 alt="Sell on CodeShelf">
+        </div>
+        <div class="col-lg-6">
+            <h6 class="text-primary text-uppercase fw-bold mb-2" style="letter-spacing:2px;">Seller Platform</h6>
+            <h2 class="display-5 fw-bold mb-4" style="color:var(--text);">
+                Empowering the world's <span style="color:var(--primary);">Creators</span>.
+            </h2>
+            <p class="text-muted mb-5" style="font-size:1.05rem;line-height:1.8;">
+                CodeShelf provides developers a massive global audience to sell their pre-built projects, UI templates, and educational courses. We handle the heavy lifting—hosting, secure payments, and content delivery—so you can focus entirely on writing great code and increasing your revenue.
+            </p>
+
+            <!-- MISSION & VISION -->
+            <div class="row g-4">
+                <div class="col-sm-6">
+                    <div class="mission-card p-4 h-100">
+                        <i class="fas fa-coins fa-2x text-primary mb-3 d-block"></i>
+                        <h5 class="fw-bold mb-2" style="color:var(--text);">Passive Income</h5>
+                        <p class="text-muted mb-0 small">
+                            Turn your past projects into an automated revenue stream that earns money while you sleep.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mission-card p-4 h-100">
+                        <i class="fas fa-globe fa-2x text-primary mb-3 d-block"></i>
+                        <h5 class="fw-bold mb-2" style="color:var(--text);">Global Reach</h5>
+                        <p class="text-muted mb-0 small">
+                            Get your work in front of thousands of eager learners and professional developers worldwide.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- WHO WE ARE -->
+<div class="container py-5">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6 mb-4 mb-lg-0 text-center">
+            <img src="{% static 'img/about.jpg' %}"
+                 class="img-fluid floating-about-img w-100"
+                 style="max-height:500px;object-fit:cover;"
+                 alt="About CodeShelf">
+        </div>
+        <div class="col-lg-6">
+            <h6 class="text-primary text-uppercase fw-bold mb-2" style="letter-spacing:2px;">Who We Are</h6>
+            <h2 class="display-5 fw-bold mb-4" style="color:var(--text);">
+                Empowering the next generation of <span style="color:var(--primary);">Developers</span>.
+            </h2>
+            <p class="text-muted mb-5" style="font-size:1.05rem;line-height:1.8;">
+                CodeShelf is a dedicated platform designed to help students, freelancers, and professional developers access high-quality, ready-made projects. Whether you are learning a new tech stack from scratch or need a robust foundation for your next academic submission, we provide complete solutions including documentation, database schemas, and source code.
+            </p>
+
+            <!-- MISSION & VISION -->
+            <div class="row g-4">
+                <div class="col-sm-6">
+                    <div class="mission-card p-4 h-100">
+                        <i class="fas fa-bullseye fa-2x text-primary mb-3 d-block"></i>
+                        <h5 class="fw-bold mb-2" style="color:var(--text);">Our Mission</h5>
+                        <p class="text-muted mb-0 small">
+                            To simplify learning and software development by providing structured, practical, and highly-documented coding projects for everyone.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="mission-card p-4 h-100">
+                        <i class="fas fa-eye fa-2x text-primary mb-3 d-block"></i>
+                        <h5 class="fw-bold mb-2" style="color:var(--text);">Our Vision</h5>
+                        <p class="text-muted mb-0 small">
+                            To become the most trusted, globally recognized marketplace for project-based learning and peer-to-peer development resources.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if user.is_authenticated and user.profile.role == 'seller' %}
+<!-- WHY CHOOSE US FOR SELLERS -->
+<div class="container py-5 my-5">
+    <div class="text-center mb-5 pb-3">
+        <h6 class="text-primary text-uppercase fw-bold mb-2" style="letter-spacing:2px;">The Advantage</h6>
+        <h2 class="display-6 fw-bold" style="color:var(--text);">Why Sell on CodeShelf?</h2>
+        <p class="text-muted">Everything you need to run a successful digital storefront.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon-box"><i class="fas fa-chart-line"></i></div>
+                <h4 class="fw-bold mb-3" style="color:var(--text);">Detailed Analytics</h4>
+                <p class="text-muted mb-0">Track your sales, profile views, and revenue growth in real-time through your intuitive seller dashboard.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon-box"><i class="fas fa-wallet"></i></div>
+                <h4 class="fw-bold mb-3" style="color:var(--text);">Fast Payouts</h4>
+                <p class="text-muted mb-0">Get paid quickly and reliably. We support automated monthly deposits directly to your connected bank account.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon-box"><i class="fas fa-shield-alt"></i></div>
+                <h4 class="fw-bold mb-3" style="color:var(--text);">Secure Delivery</h4>
+                <p class="text-muted mb-0">Your source code is protected. Only buyers who have completed a verified transaction can download your files.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- WHY CHOOSE US -->
+<div class="container py-5 my-5">
+    <div class="text-center mb-5 pb-3">
+        <h6 class="text-primary text-uppercase fw-bold mb-2" style="letter-spacing:2px;">The Advantage</h6>
+        <h2 class="display-6 fw-bold" style="color:var(--text);">Why Choose CodeShelf?</h2>
+        <p class="text-muted">Everything you need to accelerate your coding journey.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon-box"><i class="fas fa-laptop-code"></i></div>
+                <h4 class="fw-bold mb-3" style="color:var(--text);">Ready Projects</h4>
+                <p class="text-muted mb-0">Skip the configuration nightmares. Download fully working, production-ready projects complete with source code and databases.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon-box"><i class="fas fa-graduation-cap"></i></div>
+                <h4 class="fw-bold mb-3" style="color:var(--text);">Accelerated Learning</h4>
+                <p class="text-muted mb-0">Stop watching passive tutorials. Understand complex backend concepts faster through practical, hands-on reverse engineering.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon-box"><i class="fas fa-shield-alt"></i></div>
+                <h4 class="fw-bold mb-3" style="color:var(--text);">Secure Access</h4>
+                <p class="text-muted mb-0">Your downloads and purchases are safe. Only verified users can access the dashboard and download purchased project files securely.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- TEAM -->
+<div class="container team-section">
+    <span class="team-watermark">TEAM</span>
+    <div class="text-center mb-4 position-relative" style="z-index:1;">
+        <h6 class="text-primary text-uppercase fw-bold mb-2" style="letter-spacing:2px;">The Creators</h6>
+        <h2 class="display-6 fw-bold" style="color:var(--text);">Meet Our Experts</h2>
+    </div>
+    <div class="team-cards-grid">
+        <div class="team-member-card">
+            <img src="{% static 'img/team-1.jpg' %}" alt="Meghraj">
+            <div class="team-member-content">
+                <h3>Meghraj</h3>
+                <p>Team Lead</p>
+                <ul>
+                    <li><a href="#"><i class="fa-brands fa-github"></i></a></li>
+                    <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="team-member-card">
+            <img src="{% static 'img/team-2.jpg' %}" alt="Kavindra">
+            <div class="team-member-content">
+                <h3>Kavindra</h3>
+                <p>Frontend Dev</p>
+                <ul>
+                    <li><a href="#"><i class="fa-brands fa-github"></i></a></li>
+                    <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="team-member-card">
+            <img src="{% static 'img/team-3.jpg' %}" alt="Kshitij">
+            <div class="team-member-content">
+                <h3>Kshitij</h3>
+                <p>UI / UX Design</p>
+                <ul>
+                    <li><a href="#"><i class="fa-brands fa-github"></i></a></li>
+                    <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="team-member-card">
+            <img src="{% static 'img/team-5.jpg' %}" alt="Mangesh">
+            <div class="team-member-content">
+                <h3>Mangesh</h3>
+                <p>Backend Dev</p>
+                <ul>
+                    <li><a href="#"><i class="fa-brands fa-github"></i></a></li>
+                    <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

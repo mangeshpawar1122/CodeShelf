@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- HEADER -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h4 class="fw-bold mb-1" style="color:var(--text);">
+                <i class="fa fa-heart me-2" style="color:#f43f5e;"></i>My Wishlist
+            </h4>
+            <p class="text-muted mb-0" style="font-size:13px;">
+                Items you've saved for later
+            </p>
+        </div>
+        {% if items %}
+        <span class="neu-pressed rounded px-3 py-1"
+              style="font-size:13px;font-weight:700;color:var(--primary);">
+            {{ items|length }} item{{ items|length|pluralize }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if items %}
+    <div class="row g-4">
+        {% for item in items %}
+        
+        {% if item.project %}
+        <div class="col-xl-3 col-md-4 col-sm-6" id="wishlist-item-project-{{ item.project.id }}">
+            <div class="project-card w-100">
+                <div class="img-container d-block text-decoration-none">
+                    <a href="{% url 'project_detail' item.project.slug %}">
+                        <img src="{% if item.project.thumbnail %}{{ item.project.thumbnail.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" class="w-100 h-100" style="object-fit:cover;">
+                    </a>
+                    <div class="card-img-overlay-hover">
+                        <a href="{% url 'project_detail' item.project.slug %}" class="btn btn-light rounded-circle" style="width:45px;height:45px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-eye text-primary"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="box-content">
+                    <div class="action-buttons">
+                        <button class="action-btn wishlist-btn" onclick="removeFromWishlist('project', '{{ item.project.id }}', this)" title="Remove from Wishlist">
+                            <i class="fa-solid fa-trash" style="color:#fff;"></i>
+                        </button>
+                        {% if item.project.id in purchased_project_ids %}
+                        <a href="javascript:void(0);" onclick="showToast('Already Purchased!', null, null, 'fa-info-circle', '#6366f1')" class="action-btn buy-btn" title="Already Purchased" style="background-color:#6366f1;border-color:#6366f1;">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'add_to_cart' 'project' item.project.id %}" class="action-btn buy-btn buy-trigger" title="Add to Cart" style="{% if item.project.id in global_cart_project_ids %}background-color:#10b981;border-color:#10b981;{% endif %}">
+                            <i class="fa-solid {% if item.project.id in global_cart_project_ids %}fa-check{% else %}fa-cart-plus{% endif %}"></i><span class="expansion"></span>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="success-mark"></div>
+                    <div class="mt-3 mb-2">
+                        <span class="neu-pressed rounded px-2 py-1" style="font-size:11px;font-weight:700;color:var(--primary);">{{ item.project.technology }}</span>
+                    </div>
+                    <h3 class="box-title"><a href="{% url 'project_detail' item.project.slug %}">{{ item.project.title }}</a></h3>
+                    <p class="box-desc">{{ item.project.category }}</p>
+                    <div class="box-price">₹{{ item.project.price }}</div>
+                </div>
+            </div>
+        </div>
+        {% elif item.course %}
+        <div class="col-xl-3 col-md-4 col-sm-6" id="wishlist-item-course-{{ item.course.id }}">
+            <div class="project-card w-100">
+                <div class="img-container d-block text-decoration-none">
+                    <a href="{% url 'course_detail' item.course.slug %}">
+                        <img src="{% if item.course.thumbnail %}{{ item.course.thumbnail.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" class="w-100 h-100" style="object-fit:cover;">
+                    </a>
+                    {% if item.course.is_free %}
+                    <span class="badge bg-primary position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill shadow-sm">Free</span>
+                    {% endif %}
+                    <div class="card-img-overlay-hover">
+                        <a href="{% url 'course_detail' item.course.slug %}" class="btn btn-light rounded-circle" style="width:45px;height:45px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-eye text-primary"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="box-content">
+                    <div class="action-buttons">
+                        <button class="action-btn wishlist-btn" onclick="removeFromWishlist('course', '{{ item.course.id }}', this)" title="Remove from Wishlist">
+                            <i class="fa-solid fa-trash" style="color:#fff;"></i>
+                        </button>
+                        {% if item.course.id in purchased_course_ids %}
+                        <a href="javascript:void(0);" onclick="showToast('Already Purchased!', null, null, 'fa-info-circle', '#6366f1')" class="action-btn buy-btn" title="Already Purchased" style="background-color:#6366f1;border-color:#6366f1;">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'add_to_cart' 'course' item.course.id %}" class="action-btn buy-btn buy-trigger" title="Add to Cart" style="{% if item.course.id in global_cart_course_ids %}background-color:#10b981;border-color:#10b981;{% endif %}">
+                            <i class="fa-solid {% if item.course.id in global_cart_course_ids %}fa-check{% else %}fa-cart-plus{% endif %}"></i><span class="expansion"></span>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="success-mark"></div>
+                    <div class="mt-3 mb-2">
+                        <span class="neu-pressed rounded px-2 py-1" style="font-size:11px;font-weight:700;color:var(--primary);">{{ item.course.difficulty_level|title }}</span>
+                    </div>
+                    <h3 class="box-title"><a href="{% url 'course_detail' item.course.slug %}">{{ item.course.title }}</a></h3>
+                    <p class="box-desc">{{ item.course.category }}</p>
+                    <div class="box-price">{% if item.course.is_free %}FREE{% else %}₹{{ item.course.price }}{% endif %}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% endfor %}
+    </div>
+
+    {% else %}
+
+    <!-- EMPTY STATE -->
+    <div class="neu-pressed rounded p-5 text-center " style="max-width:460px;margin:0 auto;">
+        <i class="fa fa-heart fa-3x mb-3 d-block" style="color:var(--text-muted);opacity:0.3;"></i>
+        <h5 class="fw-bold mb-2" style="color:var(--text);">Your wishlist is empty</h5>
+        <p class="text-muted mb-4" style="font-size:14px;">
+            Browse projects and courses to save your favourites here.
+        </p>
+        <div class="d-flex gap-2 justify-content-center">
+            <a href="{% url 'project_list' %}" class="btn btn-primary" style="border-radius:10px;">
+                <i class="fa fa-search me-1"></i> Browse Projects
+            </a>
+            <a href="{% url 'course_list' %}" class="btn btn-outline-primary" style="border-radius:10px;">
+                <i class="fa fa-play me-1"></i> Browse Courses
+            </a>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function removeFromWishlist(itemType, itemId, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+    fetch("{% url 'toggle_wishlist' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "x-requested-with": "XMLHttpRequest"
+        },
+        body: `item_id=${itemId}&item_type=${itemType}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'removed') {
+            const card = document.getElementById(`wishlist-item-${itemType}-${itemId}`);
+            card.style.transition = 'opacity 0.3s, transform 0.3s';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                card.remove();
+                if (document.querySelectorAll('[id^="wishlist-item-"]').length === 0) {
+                    location.reload();
+                }
+            }, 300);
+
+            /* Update navbar badge */
+            const countEl = document.getElementById('wishlist-count');
+            if (countEl) {
+                const current = parseInt(countEl.textContent) - 1;
+                if (current <= 0) countEl.style.display = 'none';
+                else countEl.textContent = current;
+            }
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-trash"></i>';
+    });
+}
+</script>
+{% endblock %}

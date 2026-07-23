@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-center align-items-center" style="min-height:75vh;">
+
+        <div class="neu-raised rounded text-center p-5" style="max-width:480px;width:100%;">
+
+            <!-- ICON -->
+            <div class="mx-auto mb-4 d-flex align-items-center justify-content-center"
+                 style="width:80px;height:80px;border-radius:50%;
+                        background:rgba(244,63,94,0.10);
+                        box-shadow:var(--neu-raised);">
+                <i class="fas fa-server" style="font-size:2rem;color:#f43f5e;"></i>
+            </div>
+
+            <!-- 500 CODE -->
+            <div style="font-size:5rem;font-weight:900;line-height:1;
+                        font-family:'Nunito',sans-serif;
+                        background:linear-gradient(135deg,#f43f5e,#e11d48);
+                        -webkit-background-clip:text;
+                        -webkit-text-fill-color:transparent;
+                        background-clip:text;">
+                500
+            </div>
+
+            <!-- MESSAGE -->
+            <h5 class="fw-bold mt-2 mb-1" style="color:var(--text);">Internal Server Error</h5>
+            <p class="text-muted mb-4" style="font-size:14px;line-height:1.7;">
+                Something went wrong on our side.<br>
+                Please try again later or go back home.
+            </p>
+
+            <!-- BUTTONS -->
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{% url 'home' %}" class="btn btn-primary" style="border-radius:10px;min-width:120px;">
+                    <i class="fas fa-home me-1"></i> Home
+                </a>
+                <a href="javascript:location.reload();" class="btn btn-outline-secondary" style="border-radius:10px;min-width:120px;">
+                    <i class="fas fa-rotate-right me-1"></i> Retry
+                </a>
+            </div>
+
+            <!-- BADGE -->
+            <div class="mt-4">
+                <span class="neu-pressed rounded px-3 py-1"
+                      style="font-size:12px;font-weight:700;color:var(--text-muted);">
+                    CodeShelf Error • 500
+                </span>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

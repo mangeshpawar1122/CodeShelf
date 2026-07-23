@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- WELCOME -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4 text-center text-md-start">
+        <div>
+            <h4 class="fw-bold mb-1" style="color:var(--text);"><i class="fa-solid fa-hand-wave " style="color:#f59e0b;"></i> Hello, {{ user.first_name|default:user.username }}!</h4>
+            <p class="text-muted mb-0">Welcome to your dashboard</p>
+        </div>
+        <div class="d-flex justify-content-center gap-2">
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#testimonialModal">
+                <i class="fa-solid fa-star me-1"></i> Share Success Story
+            </button>
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger btn-sm">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- STATS CARDS -->
+    <div class="row g-3 mb-5">
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card text-center">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-solid fa-basket-shopping text-primary"></i>
+                </div>
+                <div class="stat-value">{{ total_orders }}</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card text-center">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-regular fa-heart" style="color:#f43f5e;"></i>
+                </div>
+                <div class="stat-value" style="color:#f43f5e;">{{ wishlist_count }}</div>
+                <div class="stat-label">Wishlist Items</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card text-center">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-regular fa-star" style="color:#f59e0b;"></i>
+                </div>
+                <div class="stat-value" style="color:#f59e0b;">{{ reviews_count }}</div>
+                <div class="stat-label">Reviews Given</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card text-center">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-solid fa-ticket" style="color:#10b981;"></i>
+                </div>
+                <div class="stat-value" style="color:#10b981;">{{ coupons_count }}</div>
+                <div class="stat-label">Active Coupons</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="row g-3 mb-5">
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'profile' %}"
+               class="stat-card text-center text-decoration-none d-block h-100"
+               style="cursor:pointer;">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-regular fa-user" style="color:var(--primary);"></i>
+                </div>
+                <p class="mb-0 fw-semibold" style="color:var(--text);">My Profile</p>
+            </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'order_history' %}"
+               class="stat-card text-center text-decoration-none d-block h-100"
+               style="cursor:pointer;">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-solid fa-box" style="color:#f59e0b;"></i>
+                </div>
+                <p class="mb-0 fw-semibold" style="color:var(--text);">My Orders</p>
+            </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'wishlist' %}"
+               class="stat-card text-center text-decoration-none d-block h-100"
+               style="cursor:pointer;">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-regular fa-heart" style="color:#f43f5e;"></i>
+                </div>
+                <p class="mb-0 fw-semibold" style="color:var(--text);">Wishlist</p>
+            </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <a href="{% url 'coupons' %}"
+               class="stat-card text-center text-decoration-none d-block h-100"
+               style="cursor:pointer;">
+                <div class="stat-icon mx-auto">
+                    <i class="fa-solid fa-ticket" style="color:#10b981;"></i>
+                </div>
+                <p class="mb-0 fw-semibold" style="color:var(--text);">My Coupons</p>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- RECENT ORDERS -->
+    <div class="neu-raised rounded p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0" style="color:var(--text);"><i class="fa-solid fa-box me-2" style="color:var(--primary);"></i>Recent Orders</h5>
+            <a href="{% url 'order_history' %}"
+               class="text-decoration-none small fw-semibold"
+               style="color:var(--primary);">
+                View All →
+            </a>
+        </div>
+
+        {% if recent_orders %}
+            {% for order in recent_orders %}
+            <div class="order-card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong style="color:var(--text);">Order #{{ order.id }}</strong>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="status-pill paid">
+                            <i class="fa-solid fa-circle-check" style="font-size:10px;"></i>
+                            {{ order.payment_status }}
+                        </span>
+                        <small class="text-muted">{{ order.order_date|date:"d M Y" }}</small>
+                    </div>
+                </div>
+
+                {% for item in order.items.all %}
+                <div class="d-flex justify-content-between py-1"
+                     style="border-bottom:1px solid rgba(var(--primary-rgb),0.06);">
+                    <span class="text-muted small">{{ item.project.title }}</span>
+                    <span class="small fw-semibold" style="color:var(--text);">₹{{ item.price }}</span>
+                </div>
+                {% endfor %}
+
+                <div class="text-end mt-2">
+                    <strong style="color:#10b981;">Total: ₹{{ order.total_amount }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <div class="stat-icon mx-auto mb-3" style="width:64px;height:64px;">
+                <i class="fa-solid fa-box-open" style="font-size:24px;color:var(--text-muted);"></i>
+            </div>
+            <p class="text-muted mb-3">No orders yet!</p>
+            <a href="{% url 'project_list' %}" class="btn btn-primary btn-sm">
+                <i class="fa fa-search me-1"></i> Browse Projects
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- TESTIMONIAL MODAL -->
+    <div class="modal fade" id="testimonialModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:15px; border:none; box-shadow:var(--neu-raised); background:var(--neu-bg);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" style="color:var(--text);"><i class="fa-solid fa-star text-warning me-2"></i>Share Your Success Story</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{% url 'submit_testimonial' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size:13px;color:var(--text-muted);">Rating</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="5">★★★★★ Excellent</option>
+                                <option value="4">★★★★ Good</option>
+                                <option value="3">★★★ Average</option>
+                                <option value="2">★★ Poor</option>
+                                <option value="1">★ Terrible</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" style="font-size:13px;color:var(--text-muted);">Your Feedback</label>
+                            <textarea name="content" class="form-control" rows="4" placeholder="How has CodeShelf helped you?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" style="border-radius:10px;">
+                            <i class="fa fa-paper-plane me-1"></i> Submit Feedback
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

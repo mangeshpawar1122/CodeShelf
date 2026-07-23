@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+{% load static %}
+{% load embed_video_tags %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ══ HERO ROW ══ -->
+    <div class="row g-4 mb-5">
+
+        <!-- THUMBNAIL -->
+        <div class="col-md-6">
+            <div class="neu-raised rounded overflow-hidden">
+                <img src="{{ project.thumbnail.url }}"
+                     class="img-fluid w-100"
+                     style="max-height:380px;object-fit:cover;display:block;">
+            </div>
+        </div>
+
+        <!-- INFO -->
+        <div class="col-md-6">
+            <div class="neu-raised rounded p-4 h-100 d-flex flex-column">
+
+                <!-- TITLE -->
+                <h3 class="fw-bold mb-1" style="color:var(--text);letter-spacing:-0.03em;">
+                    {{ project.title }}
+                </h3>
+                <p class="text-muted mb-3" style="font-size:14px;line-height:1.7;">
+                    {{ project.description }}
+                </p>
+
+                <!-- TECH BADGES -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="neu-pressed rounded px-3 py-1"
+                          style="font-size:12px;font-weight:700;color:var(--primary);">
+                        <i class="fa fa-code me-1"></i>{{ project.technology }}
+                    </span>
+                    <span class="neu-pressed rounded px-3 py-1"
+                          style="font-size:12px;font-weight:700;color:#f59e0b;">
+                        <i class="fa fa-signal me-1"></i>{{ project.difficulty_level|capfirst }}
+                    </span>
+                    <span class="neu-pressed rounded px-3 py-1"
+                          style="font-size:12px;font-weight:700;color:#10b981;">
+                        <i class="fa fa-check-circle me-1"></i>Source Code Included
+                    </span>
+                </div>
+
+                <!-- PRICE -->
+                <div class="neu-pressed rounded px-4 py-3 mb-4 d-flex align-items-center gap-3">
+                    <div>
+                        <div style="font-size:11px;color:var(--text-muted);font-weight:600;
+                                    text-transform:uppercase;letter-spacing:0.08em;">Price</div>
+                        <div style="font-size:1.75rem;font-weight:900;color:#10b981;line-height:1;">
+                            ₹{{ project.price }}
+                        </div>
+                    </div>
+                    <div style="flex:1;height:1px;background:rgba(var(--primary-rgb),0.1);"></div>
+                    <div style="font-size:11px;color:var(--text-muted);text-align:right;">
+                        One-time payment<br>Instant download
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex gap-2 flex-wrap mt-auto">
+                    {% if user.is_authenticated and user.profile.is_customer %}
+                        {% if has_purchased %}
+                            {% if project.zip_file %}
+                            <a href="{% url 'download_project' project.id %}"
+                               class="btn btn-success flex-grow-1"
+                               style="border-radius:10px;">
+                                <i class="fa fa-download me-1"></i> Download Project
+                            </a>
+                            {% else %}
+                            <button class="btn btn-secondary flex-grow-1" style="border-radius:10px;" disabled>
+                                <i class="fa fa-times-circle me-1"></i> No File Available
+                            </button>
+                            {% endif %}
+                            <span class="neu-pressed rounded px-3 d-flex align-items-center gap-1"
+                                  style="font-size:13px;font-weight:700;color:#10b981;">
+                                <i class="fa fa-check-circle"></i> Purchased
+                            </span>
+                        {% else %}
+                            <a href="{% url 'add_to_cart' 'project' project.id %}"
+                               class="btn btn-primary ajax-add-to-cart d-flex align-items-center justify-content-center"
+                               style="border-radius:10px; padding: 12px 20px; font-weight: 700; {% if project.id in global_cart_project_ids %}background-color:#10b981;border-color:#10b981;{% endif %}">
+                                <i class="fa {% if project.id in global_cart_project_ids %}fa-check{% else %}fa-shopping-cart{% endif %} me-1"></i> Add to Cart
+                            </a>
+                            <button class="btn btn-danger text-white wishlist-btn d-flex align-items-center justify-content-center px-4"
+                                    data-id="{{ project.id }}"
+                                    style="border-radius:10px; padding: 12px 20px; font-weight: 700; margin-top: 0;">
+                                <i class="{% if project.id in global_wishlist_project_ids %}fa-solid fa-heart text-light{% else %}fa-regular fa-heart{% endif %} me-1"></i>
+                                {% if project.id in global_wishlist_project_ids %}Wishlisted{% else %}Wishlist{% endif %}
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary w-100"
+                           style="border-radius:10px;">
+                            <i class="fa fa-lock me-1"></i> Login to Purchase
+                        </a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ DEMO VIDEO ══ -->
+    {% if project.demo_video_url %}
+    <div class="neu-raised rounded p-4 mb-4">
+        <h5 class="fw-bold mb-3" style="color:var(--text);">
+            <i class="fa fa-play-circle me-2" style="color:var(--primary);"></i>Demo Video
+        </h5>
+        <div class="ratio ratio-16x9 neu-pressed rounded overflow-hidden">
+            {% video project.demo_video_url as my_video %}
+                <iframe src="{{ my_video.url }}" width="100%" height="100%" frameborder="0" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            {% endvideo %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ══ INSTALLATION VIDEO (purchased only) ══ -->
+    {% if has_purchased and project.installation_video_url %}
+    <div class="neu-raised rounded p-4 mb-4"
+         style="border-left:3px solid #10b981;">
+        <h5 class="fw-bold mb-3" style="color:var(--text);">
+            <i class="fa fa-lock-open me-2" style="color:#10b981;"></i>
+            Installation Guide
+            <span class="neu-pressed rounded px-2 py-1 ms-2"
+                  style="font-size:11px;font-weight:700;color:#10b981;">Purchased Only</span>
+        </h5>
+        <div class="ratio ratio-16x9 neu-pressed rounded overflow-hidden">
+            {% video project.installation_video_url as my_video %}
+                <iframe src="{{ my_video.url }}" width="100%" height="100%" frameborder="0" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            {% endvideo %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ══ PROJECT DETAILS + FEATURES ══ -->
+    <div class="row g-4 mb-5">
+
+        <!-- PROJECT DETAILS -->
+        <div class="col-md-6 d-flex flex-column">
+            <div class="neu-raised rounded p-4 h-100 d-flex flex-column">
+                <h5 class="fw-bold mb-3" style="color:var(--text);">
+                    <i class="fa fa-info-circle me-2" style="color:var(--primary);"></i>
+                    Project Details
+                </h5>
+                <div class="d-flex flex-column gap-2">
+                    {% if detail_rows %}
+                        {% for label, value in detail_rows %}
+                        <div class="neu-pressed rounded px-3 py-2 d-flex justify-content-between align-items-center">
+                            <span style="font-size:13px;color:var(--text-muted);font-weight:600;">{{ label }}</span>
+                            <span style="font-size:13px;color:var(--text);font-weight:700;">{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="neu-pressed rounded px-3 py-2 d-flex justify-content-between">
+                            <span class="text-muted" style="font-size:13px;">Version</span>
+                            <span style="font-size:13px;color:var(--text);font-weight:700;">{{ project.version }}</span>
+                        </div>
+                        <div class="neu-pressed rounded px-3 py-2 d-flex justify-content-between">
+                            <span class="text-muted" style="font-size:13px;">Requirements</span>
+                            <span style="font-size:13px;color:var(--text);font-weight:700;">{{ project.requirements }}</span>
+                        </div>
+                        <div class="neu-pressed rounded px-3 py-2 d-flex justify-content-between">
+                            <span class="text-muted" style="font-size:13px;">File Size</span>
+                            <span style="font-size:13px;color:var(--text);font-weight:700;">{{ project.file_size }}</span>
+                        </div>
+                        <div class="neu-pressed rounded px-3 py-2 d-flex justify-content-between">
+                            <span class="text-muted" style="font-size:13px;">Category</span>
+                            <span style="font-size:13px;color:var(--text);font-weight:700;">{{ project.category.name }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- WHAT'S INCLUDED -->
+        <div class="col-md-6 d-flex flex-column">
+            <div class="neu-raised rounded p-4 h-100 d-flex flex-column">
+                <h5 class="fw-bold mb-3" style="color:var(--text);">
+                    <i class="fa fa-star me-2" style="color:#f59e0b;"></i>
+                    What's Included
+                </h5>
+                <div class="d-flex flex-column gap-2">
+                    {% if feature_list %}
+                        {% for feature in feature_list %}
+                        <div class="neu-pressed rounded px-3 py-2 d-flex align-items-center gap-2">
+                            <i class="fa fa-check-circle" style="color:#10b981;font-size:14px;flex-shrink:0;"></i>
+                            <span style="font-size:13px;color:var(--text);font-weight:600;">{{ feature }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        {% for feature in default_features %}
+                        <div class="neu-pressed rounded px-3 py-2 d-flex align-items-center gap-2">
+                            <i class="fa fa-check-circle" style="color:#10b981;font-size:14px;flex-shrink:0;"></i>
+                            <span style="font-size:13px;color:var(--text);font-weight:600;">{{ feature }}</span>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══ SCREENSHOTS ══ -->
+    {% if project.images.all %}
+    <div class="neu-raised rounded p-4 mb-5">
+        <h5 class="fw-bold mb-3" style="color:var(--text);">
+            <i class="fa fa-images me-2" style="color:var(--primary);"></i>Screenshots
+        </h5>
+        <div class="row g-3">
+            {% for img in project.images.all %}
+            <div class="col-md-3 col-sm-6">
+                <div class="neu-raised rounded overflow-hidden">
+                    <img src="{{ img.image.url }}" class="img-fluid w-100"
+                         style="height:140px;object-fit:cover;display:block;
+                                transition:transform 0.4s var(--ease);"
+                         onmouseover="this.style.transform='scale(1.06)'"
+                         onmouseout="this.style.transform='scale(1)'">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ══ REVIEWS ══ -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h5 class="fw-bold mb-0" style="color:var(--text);">
+                <i class="fa fa-comments me-2" style="color:var(--primary);"></i>Reviews
+            </h5>
+        </div>
+
+        <!-- REVIEW FORM -->
+        {% if user.is_authenticated and user.profile.is_customer and has_purchased %}
+        <div class="col-md-5">
+            <div class="neu-raised rounded p-4">
+                <h6 class="fw-bold mb-3" style="color:var(--text);">
+                    <i class="fa fa-pen me-2" style="color:var(--primary);"></i>Write a Review
+                </h6>
+                <form method="POST" action="{% url 'add_review' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="project_id" value="{{ project.id }}">
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:13px;color:var(--text-muted);">Rating</label>
+                        <select name="rating" class="form-select">
+                            <option value="5">★★★★★ Excellent</option>
+                            <option value="4">★★★★ Good</option>
+                            <option value="3">★★★ Average</option>
+                            <option value="2">★★ Poor</option>
+                            <option value="1">★ Terrible</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:13px;color:var(--text-muted);">Your Review</label>
+                        <textarea name="comment" class="form-control" rows="4"
+                                  placeholder="Share your experience..."></textarea>
+                    </div>
+
+                    <button class="btn btn-primary w-100" style="border-radius:10px;">
+                        <i class="fa fa-paper-plane me-1"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- EXISTING REVIEWS -->
+        <div class="col-md-{% if user.is_authenticated and user.profile.is_customer and has_purchased %}7{% else %}12{% endif %}">
+            {% for review in project.reviews.all %}
+            <div class="neu-raised rounded p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width:34px;height:34px;border-radius:50%;
+                                    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+                                    display:flex;align-items:center;justify-content:center;
+                                    font-size:12px;font-weight:800;color:#fff;
+                                    box-shadow:var(--neu-raised);flex-shrink:0;">
+                            {{ review.user.username|first|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-bold" style="font-size:14px;color:var(--text);">
+                                {{ review.user.username }}
+                            </div>
+                            <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                        </div>
+                    </div>
+                    <div class="neu-pressed rounded px-2 py-1"
+                         style="font-size:13px;font-weight:700;color:#f59e0b;letter-spacing:1px;">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}<i class="fa-solid fa-star"></i>{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <p class="mb-0" style="font-size:13px;color:var(--text-muted);line-height:1.7;">
+                    {{ review.review_text }}
+                </p>
+            </div>
+            {% empty %}
+            <div class="neu-pressed rounded p-4 text-center">
+                <i class="fa fa-comment-slash fa-2x mb-2" style="color:var(--text-muted);opacity:0.4;"></i>
+                <p class="text-muted mb-0" style="font-size:14px;">
+                    No reviews yet. Be the first to review!
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ══ RELATED PROJECTS ══ -->
+    {% if related_projects %}
+    <div class="mb-2">
+        <h5 class="fw-bold mb-4" style="color:var(--text);">
+            <i class="fa fa-layer-group me-2" style="color:var(--primary);"></i>Related Projects
+        </h5>
+        <div class="row g-4">
+            {% for p in related_projects %}
+            <div class="col-md-3 col-sm-6">
+                <div class="neu-raised rounded overflow-hidden h-100 d-flex flex-column">
+                    <img src="{{ p.thumbnail.url }}"
+                         style="height:160px;object-fit:cover;width:100%;display:block;
+                                transition:transform 0.4s var(--ease);"
+                         onmouseover="this.style.transform='scale(1.06)'"
+                         onmouseout="this.style.transform='scale(1)'"
+                         alt="{{ p.title }}">
+                    <div class="p-3 flex-grow-1 d-flex flex-column">
+                        <h6 class="fw-bold mb-1" style="color:var(--text);">{{ p.title }}</h6>
+                        <p class="text-muted mb-2 flex-grow-1"
+                           style="font-size:12px;line-height:1.6;">
+                            {{ p.description|truncatewords:10 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold" style="color:#10b981;">₹{{ p.price }}</span>
+                            <a href="{% url 'project_detail' p.slug %}"
+                               class="btn btn-sm btn-outline-primary"
+                               style="border-radius:8px;font-size:12px;">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+
+{% endblock %}

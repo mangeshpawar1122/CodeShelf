@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+
+    <h2 class="fw-bold mb-4"><i class="fa-solid fa-layer-group me-2" style="color:var(--primary);"></i>My Library & Orders</h2>
+
+    <ul class="nav nav-tabs mb-4" id="orderTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="library-tab" data-bs-toggle="tab" data-bs-target="#library" type="button" role="tab">
+                <i class="fa fa-cubes me-2"></i>My Purchased Items
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-muted" id="receipts-tab" data-bs-toggle="tab" data-bs-target="#receipts" type="button" role="tab">
+                <i class="fa fa-receipt me-2"></i>Order Receipts
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="orderTabsContent">
+        
+        <div class="tab-pane fade show active" id="library" role="tabpanel">
+            {% if purchased_projects %}
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-code me-2" style="color:var(--primary);"></i>Purchased Projects</h4>
+            <div class="row g-4 mb-4">
+                {% for project in purchased_projects %}
+                <div class="col-xl-3 col-md-4 col-sm-6">
+                    <div class="project-card w-100">
+                        <div class="img-container">
+                            <a href="{% url 'project_detail' project.slug %}">
+                                <img src="{% if project.thumbnail %}{{ project.thumbnail.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" class="w-100 h-100" style="object-fit:cover;">
+                            </a>
+                            <div class="card-img-overlay-hover">
+                                <a href="{% url 'project_detail' project.slug %}" class="btn btn-light rounded-circle" style="width:45px;height:45px;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa-solid fa-eye text-primary"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="box-content">
+                            <div class="action-buttons">
+                                {% if project.zip_file %}
+                                <a href="{% url 'download_project' project.id %}" class="action-btn buy-btn" title="Download" style="background-color:#10b981;border-color:#10b981;">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                            <div class="mt-3 mb-2">
+                                <span class="neu-pressed rounded px-2 py-1" style="font-size:11px;font-weight:700;color:var(--primary);">{{ project.technology }}</span>
+                            </div>
+                            <h3 class="box-title"><a href="{% url 'project_detail' project.slug %}">{{ project.title }}</a></h3>
+                            <p class="box-desc">{{ project.category.name }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- PAGINATION PROJECTS -->
+            <div class="d-flex justify-content-center mb-5">
+                <nav aria-label="Projects page navigation">
+                    <ul class="pagination pagination-sm neu-raised rounded p-2 mb-0 gap-1" style="background:var(--neu-bg);border:none;">
+                        {% if purchased_projects.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link rounded" href="?page_p={{ purchased_projects.previous_page_number }}{% if request.GET.page_c %}&page_c={{ request.GET.page_c }}{% endif %}" style="background:transparent;border:none;color:var(--primary);font-weight:600;"><i class="fa-solid fa-chevron-left"></i></a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in purchased_projects.paginator.page_range %}
+                            <li class="page-item">
+                                <a class="page-link rounded {% if purchased_projects.number == num %}neu-pressed text-primary{% else %}text-muted{% endif %}" href="?page_p={{ num }}{% if request.GET.page_c %}&page_c={{ request.GET.page_c }}{% endif %}" style="background:transparent;border:none;font-weight:600;min-width:32px;text-align:center;">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+        
+                        {% if purchased_projects.has_next %}
+                        <li class="page-item">
+                            <a class="page-link rounded" href="?page_p={{ purchased_projects.next_page_number }}{% if request.GET.page_c %}&page_c={{ request.GET.page_c }}{% endif %}" style="background:transparent;border:none;color:var(--primary);font-weight:600;"><i class="fa-solid fa-chevron-right"></i></a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        
+            {% if purchased_courses %}
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-graduation-cap me-2" style="color:var(--primary);"></i>Purchased Courses</h4>
+            <div class="row g-4 mb-4">
+                {% for course in purchased_courses %}
+                <div class="col-xl-3 col-md-4 col-sm-6">
+                    <div class="project-card w-100">
+                        <div class="img-container">
+                            <a href="{% url 'course_detail' course.slug %}">
+                                <img src="{% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" class="w-100 h-100" style="object-fit:cover;">
+                            </a>
+                            <div class="card-img-overlay-hover">
+                                <a href="{% url 'course_detail' course.slug %}" class="btn btn-light rounded-circle" style="width:45px;height:45px;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa-solid fa-eye text-primary"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="box-content">
+                            <div class="action-buttons">
+                                <a href="{% url 'course_detail' course.slug %}" class="action-btn buy-btn" title="Watch" style="background-color:#10b981;border-color:#10b981;">
+                                    <i class="fa-solid fa-play"></i>
+                                </a>
+                            </div>
+                            <div class="mt-3 mb-2">
+                                <span class="neu-pressed rounded px-2 py-1" style="font-size:11px;font-weight:700;color:var(--primary);">{{ course.difficulty_level|title }}</span>
+                            </div>
+                            <h3 class="box-title"><a href="{% url 'course_detail' course.slug %}">{{ course.title }}</a></h3>
+                            <p class="box-desc">{{ course.category.name }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        
+            <!-- PAGINATION COURSES -->
+            <div class="d-flex justify-content-center mb-4">
+                <nav aria-label="Courses page navigation">
+                    <ul class="pagination pagination-sm neu-raised rounded p-2 mb-0 gap-1" style="background:var(--neu-bg);border:none;">
+                        {% if purchased_courses.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link rounded" href="?page_c={{ purchased_courses.previous_page_number }}{% if request.GET.page_p %}&page_p={{ request.GET.page_p }}{% endif %}" style="background:transparent;border:none;color:var(--primary);font-weight:600;"><i class="fa-solid fa-chevron-left"></i></a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in purchased_courses.paginator.page_range %}
+                            <li class="page-item">
+                                <a class="page-link rounded {% if purchased_courses.number == num %}neu-pressed text-primary{% else %}text-muted{% endif %}" href="?page_c={{ num }}{% if request.GET.page_p %}&page_p={{ request.GET.page_p }}{% endif %}" style="background:transparent;border:none;font-weight:600;min-width:32px;text-align:center;">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+        
+                        {% if purchased_courses.has_next %}
+                        <li class="page-item">
+                            <a class="page-link rounded" href="?page_c={{ purchased_courses.next_page_number }}{% if request.GET.page_p %}&page_p={{ request.GET.page_p }}{% endif %}" style="background:transparent;border:none;color:var(--primary);font-weight:600;"><i class="fa-solid fa-chevron-right"></i></a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+                {% if not purchased_projects and not purchased_courses %}
+                <div class="col-12 text-center py-5">
+                    <i class="fa-solid fa-folder-open fa-4x text-muted mb-4" style="opacity: 0.5;"></i>
+                    <h5 class="text-muted">You haven't purchased any items yet.</h5>
+                    <div class="mt-3">
+                        <a href="{% url 'project_list' %}" class="btn btn-primary me-2">Browse Projects</a>
+                        <a href="{% url 'course_list' %}" class="btn btn-outline-primary">Browse Courses</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="receipts" role="tabpanel">
+            {% for order in orders %}
+            <div class="card shadow-sm p-4 mb-4 border-0" style="border-radius: 12px; background: var(--neu-bg); box-shadow: var(--neu-raised);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <strong style="color:var(--text);">Order #{{ order.id }}</strong>
+                    <div>
+                        <span class="badge bg-success me-2">{{ order.payment_status }}</span>
+                        <span class="text-muted">{{ order.order_date|date:"d M Y" }}</span>
+                    </div>
+                </div>
+                <hr style="border-color: rgba(var(--primary-rgb), 0.1);">
+                {% for item in order.items.all %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color:var(--text);">
+                        {% if item.project %}{{ item.project.title }} <span class="badge bg-primary ms-1" style="font-size:0.6rem;">Project</span>{% endif %}
+                        {% if item.course %}{{ item.course.title }} <span class="badge bg-info ms-1" style="font-size:0.6rem;">Course</span>{% endif %}
+                    </span>
+                    <span style="color:var(--text);">₹{{ item.price }}</span>
+                </div>
+                {% endfor %}
+                <hr style="border-color: rgba(var(--primary-rgb), 0.1);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <strong style="color:var(--primary);">Total: ₹{{ order.total_amount }}</strong>
+                    <span class="text-muted small">{{ order.payment_method|upper }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="fa-solid fa-file-invoice fa-4x text-muted mb-4" style="opacity: 0.5;"></i>
+                <h5 class="text-muted">No order history found.</h5>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Required to make bootstrap tabs work if there's no native bootstrap JS handling it
+    document.querySelectorAll('#orderTabs button').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('#orderTabs button').forEach(btn => btn.classList.remove('active', 'text-muted'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+            
+            button.classList.add('active');
+            button.classList.remove('text-muted');
+            
+            const targetPane = document.querySelector(button.dataset.bsTarget);
+            targetPane.classList.add('show', 'active');
+        });
+    });
+</script>
+{% endblock %}
